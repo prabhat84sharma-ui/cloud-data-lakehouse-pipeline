@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cloud-data-lakehouse-pipeline"
+version = "1.0.0"
+description = "Production-grade Cloud Data Lakehouse pipeline using PySpark, Delta Lake, AWS S3/MinIO, and Trino-compatible analytics"
+readme = "README.md"
+authors = [
+    { name = "Prabhat Sharma", email = "prabhat84sharma@users.noreply.github.com" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.10"
+keywords = [
+    "data-engineering",
+    "pyspark",
+    "delta-lake",
+    "lakehouse",
+    "medallion-architecture",
+    "aws-s3",
+    "trino",
+    "etl",
+    "data-quality",
+    "spark-sql"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Topic :: Database",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "pyspark>=3.5.0,<3.6.0",
+    "delta-spark>=3.2.0,<3.3.0",
+    "pyarrow>=14.0.0",
+    "pandas>=2.1.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "python-dotenv>=1.0.0",
+    "PyYAML>=6.0.1",
+    "tabulate>=0.9.0",
+    "rich>=13.7.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.12.0",
+    "ruff>=0.1.9"
+]
+
+[project.scripts]
+lakehouse-pipeline = "src.pipeline:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-ra -q --durations=5"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+
+[tool.ruff]
+line-length = 100
+select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
+ignore = ["E501"]

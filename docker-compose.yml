@@ -1,0 +1,57 @@
+version: "3.8"
+
+services:
+  # ============================================================================
+  # MinIO - High-Performance S3 Compatible Object Store
+  # ============================================================================
+  minio:
+    image: minio/minio:RELEASE.2024-03-05T04-48-44Z
+    container_name: lakehouse-minio
+    ports:
+      - "9000:9000"   # S3 API Port
+      - "9001:9001"   # MinIO Web Console
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================================
+  # Bucket Initializer - Automates bucket provisioning
+  # ============================================================================
+  minio-init:
+    image: minio/mc:latest
+    container_name: lakehouse-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set myminio http://minio:9000 minioadmin minioadmin;
+      /usr/bin/mc mb --ignore-existing myminio/lakehouse-data;
+      /usr/bin/mc anonymous set download myminio/lakehouse-data;
+      exit 0;
+      "
+
+  # ============================================================================
+  # Trino - Distributed SQL Query Engine for Delta Lake Analytics
+  # ============================================================================
+  trino:
+    image: trinodb/trino:442
+    container_name: lakehouse-trino
+    ports:
+      - "8080:8080"   # Trino Web UI and JDBC/CLI endpoint
+    volumes:
+      - ./docker/trino/catalog:/etc/trino/catalog:ro
+    depends_on:
+      minio:
+        condition: service_healthy
+
+volumes:
+  minio_data:
